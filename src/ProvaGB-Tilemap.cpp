@@ -169,8 +169,8 @@
      int imgWidth, imgHeight;
      GLuint texID = loadTexture(mapa.tilesetPath, imgWidth, imgHeight);
  
-     int tileIndices[2] = {2, 3}; // 2 = terra, 4 = lava
-     for (int i = 0; i < 2; i++)
+     int tileIndices[3] = {2, 3, 6}; // Terra, Lava, Rosa
+     for (int i = 0; i < 3; i++)
      {
          Tile tile;
          tile.dimensions = vec3(mapa.tileWidth, mapa.tileHeight, 1.0);
@@ -178,16 +178,17 @@
          tile.texID = texID;
          tile.VAO = setupTile(7, tile.ds, tile.dt); // Apenas 2 tiles
          
-         if (i == 0) // Terra
-         {
-             tile.caminhavel = true;
-             tile.letal = false;
-         }
-         else if (i == 1) // Lava
-         {
-             tile.caminhavel = true; // Pode pisar, mas é letal
-             tile.letal = true;
-         }
+  
+         if (i == 0) { // Terra
+            tile.caminhavel = true;
+            tile.letal = false;
+        } else if (i == 1) { // Lava
+            tile.caminhavel = true;
+            tile.letal = true;
+        } else if (i == 2) { // Rosa
+            tile.caminhavel = true;
+            tile.letal = false;
+        }
  
          tileset.push_back(tile);
      }
@@ -377,8 +378,14 @@
              int tileType = mapa.tiles[(int)novaPos.x][(int)novaPos.y];
              
              // Garantir que apenas tiles 0 e 1 são válidos
-            if (tileType == 0 || tileType == 1) {
+             if (tileType == 0 || tileType == 1 || tileType == 2) {
                 pos = novaPos;
+            
+                // Se pisar no rosa (tileType == 2), transforme em terra (0)
+                if (tileType == 2) {
+                    mapa.tiles[(int)novaPos.x][(int)novaPos.y] = 0;
+                    cout << "PISOU NO TILE ROSA! Ele virou terra." << endl;
+                }
             } else {
                 cout << "Movimento bloqueado - tile inválido: " << tileType << endl;
             }
@@ -433,13 +440,9 @@ cout << "Tile na posicao: " << mapa.tiles[(int)pos.x][(int)pos.y] << endl;
          for (int j = 0; j < mapa.mapWidth; j++)
          {
              int tileIndex = mapa.tiles[i][j];
-
-             if (tileIndex < 0 || tileIndex > 1) {
-                continue; // não desenha tiles inválidos
-            }
              
              // Garantir que só usamos tiles válidos (0=terra, 1=lava)
-             if (tileIndex < 0 || tileIndex > 1) {
+             if (tileIndex < 0 || tileIndex > 2) {
                  tileIndex = 0; // Default para terra se inválido
              }
              
@@ -562,12 +565,14 @@ cout << "Tile na posicao: " << mapa.tiles[(int)pos.x][(int)pos.y] << endl;
              file >> mapData.tiles[i][j];
              // Simplificar: apenas terra(0) ou lava(1)
              int valor = mapData.tiles[i][j];
-             if (valor == 2)
-                 mapData.tiles[i][j] = 0; // Terra
-             else if (valor == 4)
-                 mapData.tiles[i][j] = 1; // Lava
-             else
-                 mapData.tiles[i][j] = -1; // Tile inválido
+             if (valor == 2) // Terra (índice 2 no PNG)
+             mapData.tiles[i][j] = 0;
+         else if (valor == 4) // Lava (índice 3 no PNG)
+             mapData.tiles[i][j] = 1;
+         else if (valor == 6) // Rosa (índice 6 no PNG)
+             mapData.tiles[i][j] = 2;
+         else
+             mapData.tiles[i][j] = -1;
          }
      }
  
