@@ -84,5 +84,5 @@ Certifique-se de ter as bibliotecas necessárias (GLFW, GLAD, stb_image, GLM) co
 
 ```bash
 g++ main.cpp -o jogo -lglfw -lGL -ldl -lX11 -lpthread
-./jogo
+.\build\ProvaGB-Tilemap.exe
 ```
